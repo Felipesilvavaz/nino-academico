@@ -37,10 +37,26 @@ class RelatorioController extends Controller
             'gmd' => $l->gmd(),
             'ca' => $l->conversaoAlimentar(),
             'iep' => $l->iep(),
+            'projecao' => $l->pesoProjetadoAbateG(),
+            'alertaPeso' => $l->alertaPeso(),
+            'alertaMortalidade' => $l->alertaMortalidade(),
         ]);
+
+        // RF18: relatório de peso ao abate, só com os lotes já encerrados.
+        $abatidos = $lotes->filter(fn (Lote $l) => $l->status === \App\Enums\StatusLote::ENCERRADO)
+            ->map(fn (Lote $l) => [
+                'lote' => $l,
+                'idadeAbate' => $l->idadeAtual(),
+                'pesoInicial' => $l->peso_inicial_g,
+                'pesoAbate' => $l->pesoMedioAtualG(),
+                'ganhoTotal' => $l->pesoMedioAtualG() ? round($l->pesoMedioAtualG() - $l->peso_inicial_g, 0) : null,
+                'gmd' => $l->gmd(),
+                'viabilidade' => $l->viabilidade(),
+            ])->values();
 
         return view('relatorios.desempenho', [
             'linhas' => $linhas,
+            'abatidos' => $abatidos,
             'granjas' => Granja::orderBy('nome')->get(),
             'filtros' => $filtros,
         ]);

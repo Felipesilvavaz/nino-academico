@@ -110,6 +110,32 @@ class Lote extends Model
         return round(($pesagem->peso_medio_g - $this->peso_inicial_g) / $pesagem->idade_dias, 2);
     }
 
+    /**
+     * RN13: projeta o peso médio (g) na data de abate prevista, extrapolando o GMD atual
+     * do lote a partir do último registro. Retorna null se faltar data de abate prevista,
+     * GMD ou se o lote já estiver encerrado.
+     */
+    public function pesoProjetadoAbateG(): ?float
+    {
+        if (! $this->data_abate_prevista || ! $this->estaAberto()) {
+            return null;
+        }
+
+        $pesagem = $this->ultimaPesagem();
+        $gmdAtual = $this->gmd();
+        if (! $pesagem || ! $gmdAtual) {
+            return null;
+        }
+
+        $idadeNoAbate = $this->idadeAtual($this->data_abate_prevista);
+        $diasRestantes = $idadeNoAbate - $pesagem->idade_dias;
+        if ($diasRestantes <= 0) {
+            return $pesagem->peso_medio_g;
+        }
+
+        return round($pesagem->peso_medio_g + $gmdAtual * $diasRestantes, 0);
+    }
+
     /** RN08: conversão alimentar = ração consumida (kg) / peso vivo total (kg). */
     public function conversaoAlimentar(): ?float
     {
@@ -140,5 +166,82 @@ class Lote extends Model
             'status' => StatusLote::ENCERRADO,
             'data_encerramento' => $data,
         ]);
+    }
+
+    // ---------------- Alertas de acompanhamento ----------------
+
+    /**
+     * Curva de referência de peso médio por idade (g), usada só para sinalizar
+     * desvio no acompanhamento. É uma curva genérica de frango de corte,
+     * não um parâmetro de linhagem real de nenhuma empresa.
+     */
+    private const CURVA_PESO_REFERENCIA = [
+        0 => 42, 7 => 175, 14 => 430, 21 => 850, 28 => 1380,
+        35 => 1950, 42 => 2450, 49 => 2850, 56 => 3150,
+    ];
+
+    /** Peso médio esperado (g) para a idade informada, por interpolação linear na curva de referência. */
+    public function pesoEsperadoG(int $idadeDias): float
+    {
+        $pontos = self::CURVA_PESO_REFERENCIA;
+        $idades = array_keys($pontos);
+
+        if ($idadeDias <= $idades[0]) {
+            return $pontos[$idades[0]];
+        }
+
+        foreach ($idades as $i => $idade) {
+            if ($idadeDias <= $idade) {
+                $idadeAnterior = $idades[$i - 1];
+
+                return $pontos[$idadeAnterior]
+                    + ($pontos[$idade] - $pontos[$idadeAnterior])
+                    * (($idadeDias - $idadeAnterior) / ($idade - $idadeAnterior));
+            }
+        }
+
+        return $pontos[end($idades)];
+    }
+
+    /** RN10: sinaliza quando o peso do último registro está abaixo de 85% do esperado para a idade. */
+    public function alertaPeso(): bool
+    {
+        $pesagem = $this->ultimaPesagem();
+        if (! $pesagem) {
+            return false;
+        }
+
+        return $pesagem->peso_medio_g < $this->pesoEsperadoG($pesagem->idade_dias) * 0.85;
+    }
+
+    /** RN11: sinaliza quando a perda (mortalidade + eliminados) do último registro passa de 0,5% das aves vivas até então. */
+    public function alertaMortalidade(): bool
+    {
+        $ordenados = $this->acompanhamentos->sortBy('data')->values();
+        if ($ordenados->isEmpty()) {
+            return false;
+        }
+
+        $ultimo = $ordenados->last();
+        $perdasAnteriores = $ordenados->slice(0, -1)->sum(fn ($a) => $a->mortalidade + $a->eliminados);
+        $vivasAntes = $this->qtd_alojada - $perdasAnteriores;
+        $perdaDoDia = $ultimo->mortalidade + $ultimo->eliminados;
+
+        return $vivasAntes > 0 && ($perdaDoDia / $vivasAntes) > 0.005;
+    }
+
+    /** Dias desde o último acompanhamento registrado (ou desde o alojamento, se nunca registrou). */
+    public function diasSemAcompanhamento(): int
+    {
+        $ultimo = $this->acompanhamentos->sortBy('data')->last();
+        $referencia = $ultimo ? $ultimo->data : $this->data_alojamento;
+
+        return max(0, $referencia->copy()->startOfDay()->diffInDays(Carbon::today(), false));
+    }
+
+    /** RN12: lote aberto sem acompanhamento há mais de 7 dias precisa de visita técnica. */
+    public function precisaVisita(): bool
+    {
+        return $this->estaAberto() && $this->diasSemAcompanhamento() > 7;
     }
 }

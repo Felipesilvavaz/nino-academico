@@ -6,6 +6,11 @@
     <div>
         <h1 class="h4 titulo-secao mb-1">Lote {{ $lote->codigo }} <span class="badge text-bg-{{ $lote->status->cor() }} fs-6">{{ $lote->status->label() }}</span></h1>
         <div class="text-muted">{{ $lote->aviario->nomeCompleto() }} · Produtor: {{ $lote->aviario->granja->produtor->nome }} · Técnico: {{ $lote->tecnico->name }}</div>
+        <div class="mt-2 d-flex flex-wrap gap-2">
+            @if ($lote->alertaMortalidade())<span class="badge text-bg-danger"><i class="bi bi-exclamation-triangle"></i> Mortalidade acima do esperado (RN11)</span>@endif
+            @if ($lote->alertaPeso())<span class="badge text-bg-warning text-dark"><i class="bi bi-arrow-down-short"></i> Peso abaixo da curva de referência (RN10)</span>@endif
+            @if ($lote->precisaVisita())<span class="badge text-bg-info text-dark"><i class="bi bi-geo-alt"></i> Sem acompanhamento há {{ $lote->diasSemAcompanhamento() }} dias (RN12)</span>@endif
+        </div>
     </div>
     @can('operar')
     <div class="d-flex gap-2 no-print">
@@ -41,6 +46,7 @@
         ['Ração consumida', $fmt($lote->consumoTotalKg()).' kg'],
         ['Conversão alimentar', $fmt($lote->conversaoAlimentar(), 3)],
         ['IEP', $fmt($lote->iep())],
+        ['Projeção de peso no abate', $lote->pesoProjetadoAbateG() ? $fmt($lote->pesoProjetadoAbateG()).' g' : '—'],
     ] as [$rotulo, $valor])
         <div class="col-6 col-md-4 col-xl"><div class="card kpi p-3 h-100"><div class="rotulo">{{ $rotulo }}</div><div class="valor fs-4">{{ $valor }}</div></div></div>
     @endforeach

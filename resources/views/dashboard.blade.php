@@ -11,6 +11,13 @@
     <div class="col-6 col-lg-3"><div class="card kpi p-3"><div class="rotulo">Aviários livres</div><div class="valor">{{ $aviariosLivres }}</div></div></div>
 </div>
 
+@if ($lotesComAlerta > 0 || $lotesPendentesVisita > 0)
+<div class="d-flex flex-wrap gap-2 mb-4">
+    @if ($lotesComAlerta > 0)<span class="badge text-bg-danger fs-6"><i class="bi bi-exclamation-triangle"></i> {{ $lotesComAlerta }} lote(s) com alerta de mortalidade ou peso</span>@endif
+    @if ($lotesPendentesVisita > 0)<span class="badge text-bg-info text-dark fs-6"><i class="bi bi-geo-alt"></i> {{ $lotesPendentesVisita }} lote(s) sem visita há mais de 7 dias</span>@endif
+</div>
+@endif
+
 <div class="d-flex justify-content-between align-items-center mb-2">
     <h2 class="h6 titulo-secao mb-0">Lotes em andamento</h2>
     @can('operar')<a href="{{ route('lotes.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Alojar lote</a>@endcan

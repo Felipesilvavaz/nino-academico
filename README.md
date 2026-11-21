@@ -91,6 +91,10 @@ docs/                             documentação do projeto (PDF)
 - **RN05:** granja ou aviário com lotes vinculados não pode ser excluído.
 - **RN06:** só o administrador mantém usuários, e usuários inativos não fazem login.
 - **RN07 a RN09:** viabilidade, conversão alimentar e IEP calculados automaticamente (`app/Models/Lote.php`).
+- **RN10:** alerta de peso quando o peso médio fica abaixo de 85% de uma curva de referência genérica para a idade.
+- **RN11:** alerta de mortalidade quando a perda do último registro passa de 0,5% das aves vivas.
+- **RN12:** lote aberto sem acompanhamento há mais de 7 dias é sinalizado como pendente de visita técnica.
+- **RN13:** projeção do peso no abate a partir do ganho médio diário (GMD) atual do lote.
 
 ## Documentação
 

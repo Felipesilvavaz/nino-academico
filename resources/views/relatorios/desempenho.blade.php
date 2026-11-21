@@ -20,7 +20,7 @@
 <div class="card">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead><tr><th>Lote</th><th>Granja / Aviário</th><th>Status</th><th class="text-end">Idade (d)</th><th class="text-end">Alojadas</th><th class="text-end">Vivas</th><th class="text-end">Viabilidade</th><th class="text-end">Peso (g)</th><th class="text-end">GMD</th><th class="text-end">CA</th><th class="text-end">IEP</th></tr></thead>
+            <thead><tr><th>Lote</th><th>Granja / Aviário</th><th>Status</th><th class="text-end">Idade (d)</th><th class="text-end">Alojadas</th><th class="text-end">Vivas</th><th class="text-end">Viabilidade</th><th class="text-end">Peso (g)</th><th class="text-end">GMD</th><th class="text-end">CA</th><th class="text-end">IEP</th><th class="text-end">Projeção abate (g)</th><th class="no-print">Alertas</th></tr></thead>
             <tbody>
             @forelse ($linhas as $r)
                 <tr>
@@ -35,9 +35,14 @@
                     <td class="text-end">{{ $fmt($r['gmd'], 1) }}</td>
                     <td class="text-end">{{ $fmt($r['ca'], 3) }}</td>
                     <td class="text-end fw-semibold">{{ $fmt($r['iep']) }}</td>
+                    <td class="text-end">{{ $fmt($r['projecao']) }}</td>
+                    <td class="no-print">
+                        @if ($r['alertaMortalidade'])<span class="badge text-bg-danger" title="RN11: perda do último registro acima de 0,5% das aves vivas"><i class="bi bi-exclamation-triangle"></i> Mortalidade</span>@endif
+                        @if ($r['alertaPeso'])<span class="badge text-bg-warning text-dark" title="RN10: peso abaixo de 85% da curva de referência"><i class="bi bi-arrow-down-short"></i> Peso</span>@endif
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="11" class="text-center text-muted py-4">Nenhum resultado para os filtros informados.</td></tr>
+                <tr><td colspan="13" class="text-center text-muted py-4">Nenhum resultado para os filtros informados.</td></tr>
             @endforelse
             </tbody>
             @if ($linhas->isNotEmpty())
@@ -51,11 +56,39 @@
                     <td class="text-end">{{ $fmt($linhas->whereNotNull('gmd')->avg('gmd'), 1) }}</td>
                     <td class="text-end">{{ $fmt($linhas->whereNotNull('ca')->avg('ca'), 3) }}</td>
                     <td class="text-end">{{ $fmt($linhas->whereNotNull('iep')->avg('iep')) }}</td>
+                    <td class="text-end">{{ $fmt($linhas->whereNotNull('projecao')->avg('projecao')) }}</td>
+                    <td class="no-print"></td>
                 </tr>
             </tfoot>
             @endif
         </table>
     </div>
 </div>
-<p class="text-muted small mt-2">Viabilidade = vivas ÷ alojadas × 100 · CA = ração consumida (kg) ÷ peso vivo total (kg) · IEP = (viabilidade × peso kg) ÷ (idade × CA) × 100</p>
+<p class="text-muted small mt-2">Viabilidade = vivas ÷ alojadas × 100 · CA = ração consumida (kg) ÷ peso vivo total (kg) · IEP = (viabilidade × peso kg) ÷ (idade × CA) × 100 · Projeção = peso do último registro + GMD atual × dias até o abate previsto (RN13)</p>
+
+<h2 class="h6 titulo-secao mt-4">Relatório de peso ao abate</h2>
+<p class="text-muted small">Lotes já encerrados, comparando o peso inicial com o peso registrado no encerramento.</p>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead><tr><th>Lote</th><th>Granja / Aviário</th><th class="text-end">Idade ao abate</th><th class="text-end">Peso inicial (g)</th><th class="text-end">Peso ao abate (g)</th><th class="text-end">Ganho total (g)</th><th class="text-end">GMD médio</th><th class="text-end">Viabilidade final</th></tr></thead>
+            <tbody>
+            @forelse ($abatidos as $r)
+                <tr>
+                    <td><a href="{{ route('lotes.show', $r['lote']) }}">{{ $r['lote']->codigo }}</a></td>
+                    <td>{{ $r['lote']->aviario->nomeCompleto() }}</td>
+                    <td class="text-end">{{ $r['idadeAbate'] }} d</td>
+                    <td class="text-end">{{ $fmt($r['pesoInicial']) }}</td>
+                    <td class="text-end fw-semibold">{{ $fmt($r['pesoAbate']) }}</td>
+                    <td class="text-end">{{ $fmt($r['ganhoTotal']) }}</td>
+                    <td class="text-end">{{ $fmt($r['gmd'], 1) }}</td>
+                    <td class="text-end">{{ $fmt($r['viabilidade'], 2) }}%</td>
+                </tr>
+            @empty
+                <tr><td colspan="8" class="text-center text-muted py-4">Nenhum lote encerrado para os filtros informados.</td></tr>
+            @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 @endsection

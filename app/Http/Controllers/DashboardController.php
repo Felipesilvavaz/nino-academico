@@ -22,6 +22,8 @@ class DashboardController extends Controller
             'totalGranjas' => Granja::where('ativo', true)->count(),
             'aviariosLivres' => Aviario::livres()->count(),
             'avesAlojadas' => $abertos->sum(fn (Lote $l) => $l->avesVivas()),
+            'lotesComAlerta' => $abertos->filter(fn (Lote $l) => $l->alertaMortalidade() || $l->alertaPeso())->count(),
+            'lotesPendentesVisita' => $abertos->filter(fn (Lote $l) => $l->precisaVisita())->count(),
         ]);
     }
 }

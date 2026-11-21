@@ -18,7 +18,7 @@
 <div class="card">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead><tr><th>Código</th><th>Granja / Aviário</th><th>Linhagem</th><th>Alojamento</th><th class="text-end">Alojadas</th><th class="text-end">Idade</th><th class="text-end">Viabilidade</th><th>Status</th><th>Técnico</th></tr></thead>
+            <thead><tr><th>Código</th><th>Granja / Aviário</th><th>Linhagem</th><th>Alojamento</th><th class="text-end">Alojadas</th><th class="text-end">Idade</th><th class="text-end">Viabilidade</th><th>Status</th><th>Técnico</th><th>Alertas</th></tr></thead>
             <tbody>
             @forelse ($lotes as $l)
                 <tr>
@@ -31,9 +31,14 @@
                     <td class="text-end">{{ number_format($l->viabilidade(), 2, ',', '.') }}%</td>
                     <td><span class="badge text-bg-{{ $l->status->cor() }}">{{ $l->status->label() }}</span></td>
                     <td>{{ $l->tecnico->name }}</td>
+                    <td>
+                        @if ($l->alertaMortalidade())<i class="bi bi-exclamation-triangle-fill text-danger" title="Mortalidade acima do esperado"></i>@endif
+                        @if ($l->alertaPeso())<i class="bi bi-arrow-down-short text-warning" title="Peso abaixo da curva de referência"></i>@endif
+                        @if ($l->precisaVisita())<i class="bi bi-geo-alt-fill text-info" title="Sem acompanhamento há {{ $l->diasSemAcompanhamento() }} dias"></i>@endif
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="9" class="text-center text-muted py-4">Nenhum lote encontrado.</td></tr>
+                <tr><td colspan="10" class="text-center text-muted py-4">Nenhum lote encontrado.</td></tr>
             @endforelse
             </tbody>
         </table>
