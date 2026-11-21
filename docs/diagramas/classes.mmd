@@ -51,7 +51,10 @@ classDiagram
         +int qtdAlojada
         +float pesoInicialG
         +Date dataAbatePrevista
+        +string frigorificoDestino
         +Date dataEncerramento
+        +float rendimentoPct
+        +string resultadoSalmonella
         +StatusLote status
         +idadeAtual() int
         +avesVivas() int
@@ -59,6 +62,11 @@ classDiagram
         +viabilidade() float
         +conversaoAlimentar() float
         +iep() float
+        +pesoEsperadoG(idade) float
+        +alertaPeso() bool
+        +alertaMortalidade() bool
+        +precisaVisita() bool
+        +pesoProjetadoAbateG() float
         +encerrar(Date data) void
     }
     class Acompanhamento {
@@ -71,7 +79,23 @@ classDiagram
         +float pesoMedioG
         +float temperaturaC
         +string observacao
+        +bool checklistAgua
+        +bool checklistRacao
+        +bool checklistVentilacao
+        +bool checklistCama
+        +string tipoRacao
         +lote() BelongsTo
+        +checklistConcluido() int
+    }
+    class OcorrenciaSanitaria {
+        +int id
+        +string tipo
+        +string descricao
+        +string status
+        +Date dataAbertura
+        +Date dataResolucao
+        +lote() BelongsTo
+        +resolver() void
     }
     class StatusLote {
         <<enumeration>>
@@ -83,6 +107,8 @@ classDiagram
     Granja "1" *-- "1..*" Aviario : contém
     Aviario "1" --> "0..*" Lote : aloja
     Lote "1" *-- "0..*" Acompanhamento : possui
+    Lote "1" *-- "0..*" OcorrenciaSanitaria : possui
     User "1" --> "0..*" Lote : responsável
     User "1" --> "0..*" Acompanhamento : registra
+    User "1" --> "0..*" OcorrenciaSanitaria : abre
     Lote ..> StatusLote

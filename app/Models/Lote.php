@@ -16,7 +16,14 @@ class Lote extends Model
 
     protected $fillable = [
         'aviario_id', 'tecnico_id', 'codigo', 'linhagem', 'data_alojamento', 'qtd_alojada',
-        'peso_inicial_g', 'data_abate_prevista', 'data_encerramento', 'status',
+        'peso_inicial_g', 'data_abate_prevista', 'frigorifico_destino',
+        'data_encerramento', 'rendimento_pct', 'resultado_salmonella', 'status',
+    ];
+
+    public const RESULTADOS_SALMONELLA = [
+        'nao_testado' => 'Não testado',
+        'negativo' => 'Negativo',
+        'positivo' => 'Positivo',
     ];
 
     protected function casts(): array
@@ -27,6 +34,7 @@ class Lote extends Model
             'data_encerramento' => 'date',
             'qtd_alojada' => 'integer',
             'peso_inicial_g' => 'float',
+            'rendimento_pct' => 'float',
             'status' => StatusLote::class,
         ];
     }
@@ -46,6 +54,17 @@ class Lote extends Model
     public function acompanhamentos(): HasMany
     {
         return $this->hasMany(Acompanhamento::class)->orderBy('data');
+    }
+
+    /** RF19: chamados sanitários abertos pelo técnico para este lote. */
+    public function ocorrenciasSanitarias(): HasMany
+    {
+        return $this->hasMany(OcorrenciaSanitaria::class)->orderByDesc('data_abertura');
+    }
+
+    public function ocorrenciasSanitariasAbertas(): int
+    {
+        return $this->ocorrenciasSanitarias->where('status', 'aberta')->count();
     }
 
     // ---------------- Regras de negócio ----------------
@@ -160,11 +179,23 @@ class Lote extends Model
         return round(($this->viabilidade() * ($pesagem->peso_medio_g / 1000)) / ($pesagem->idade_dias * $ca) * 100, 0);
     }
 
-    public function encerrar(CarbonInterface $data): void
-    {
+    /**
+     * Encerra o lote (abate). $frigorificoDestino, $rendimentoPct e $resultadoSalmonella
+     * são os dados do informe de rendimento e do monitoramento de Salmonella (RF24),
+     * preenchidos pelo técnico no momento do encerramento.
+     */
+    public function encerrar(
+        CarbonInterface $data,
+        ?string $frigorificoDestino = null,
+        ?float $rendimentoPct = null,
+        ?string $resultadoSalmonella = null,
+    ): void {
         $this->update([
             'status' => StatusLote::ENCERRADO,
             'data_encerramento' => $data,
+            'frigorifico_destino' => $frigorificoDestino ?? $this->frigorifico_destino,
+            'rendimento_pct' => $rendimentoPct,
+            'resultado_salmonella' => $resultadoSalmonella ?? 'nao_testado',
         ]);
     }
 

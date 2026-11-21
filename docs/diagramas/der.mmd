@@ -6,6 +6,8 @@ erDiagram
     GRANJAS ||--|{ AVIARIOS : "contém"
     AVIARIOS ||--o{ LOTES : "aloja"
     LOTES ||--o{ ACOMPANHAMENTOS : "possui"
+    LOTES ||--o{ OCORRENCIAS_SANITARIAS : "possui"
+    USERS ||--o{ OCORRENCIAS_SANITARIAS : "abre"
     USERS {
         bigint id PK
         varchar name
@@ -59,7 +61,10 @@ erDiagram
         int qtd_alojada
         decimal peso_inicial_g
         date data_abate_prevista
+        varchar frigorifico_destino
         date data_encerramento
+        decimal rendimento_pct
+        enum resultado_salmonella "nao_testado, negativo, positivo"
         enum status "aberto, encerrado, cancelado"
         timestamp created_at
         timestamp updated_at
@@ -77,6 +82,23 @@ erDiagram
         decimal peso_medio_g
         decimal temperatura_c
         text observacao
+        boolean checklist_agua
+        boolean checklist_racao
+        boolean checklist_ventilacao
+        boolean checklist_cama
+        enum tipo_racao "pelet, farelo"
+        timestamp created_at
+        timestamp updated_at
+    }
+    OCORRENCIAS_SANITARIAS {
+        bigint id PK
+        bigint lote_id FK
+        bigint user_id FK
+        enum tipo "doenca, mortalidade_anormal, outro"
+        text descricao
+        enum status "aberta, resolvida"
+        date data_abertura
+        date data_resolucao
         timestamp created_at
         timestamp updated_at
     }

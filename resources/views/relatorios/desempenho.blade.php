@@ -71,7 +71,7 @@
 <div class="card">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead><tr><th>Lote</th><th>Granja / Aviário</th><th class="text-end">Idade ao abate</th><th class="text-end">Peso inicial (g)</th><th class="text-end">Peso ao abate (g)</th><th class="text-end">Ganho total (g)</th><th class="text-end">GMD médio</th><th class="text-end">Viabilidade final</th></tr></thead>
+            <thead><tr><th>Lote</th><th>Granja / Aviário</th><th class="text-end">Idade ao abate</th><th class="text-end">Peso inicial (g)</th><th class="text-end">Peso ao abate (g)</th><th class="text-end">Ganho total (g)</th><th class="text-end">GMD médio</th><th class="text-end">Viabilidade final</th><th class="text-end">Rendimento</th><th>Salmonella</th></tr></thead>
             <tbody>
             @forelse ($abatidos as $r)
                 <tr>
@@ -83,9 +83,15 @@
                     <td class="text-end">{{ $fmt($r['ganhoTotal']) }}</td>
                     <td class="text-end">{{ $fmt($r['gmd'], 1) }}</td>
                     <td class="text-end">{{ $fmt($r['viabilidade'], 2) }}%</td>
+                    <td class="text-end">{{ $r['rendimento'] ? $fmt($r['rendimento'], 2).'%' : '—' }}</td>
+                    <td>
+                        @if ($r['salmonella'] === 'positivo')<span class="badge text-bg-danger">Positivo</span>
+                        @elseif ($r['salmonella'] === 'negativo')<span class="badge text-bg-success">Negativo</span>
+                        @else<span class="badge text-bg-secondary">Não testado</span>@endif
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="8" class="text-center text-muted py-4">Nenhum lote encerrado para os filtros informados.</td></tr>
+                <tr><td colspan="10" class="text-center text-muted py-4">Nenhum lote encerrado para os filtros informados.</td></tr>
             @endforelse
             </tbody>
         </table>

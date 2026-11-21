@@ -52,6 +52,8 @@ class RelatorioController extends Controller
                 'ganhoTotal' => $l->pesoMedioAtualG() ? round($l->pesoMedioAtualG() - $l->peso_inicial_g, 0) : null,
                 'gmd' => $l->gmd(),
                 'viabilidade' => $l->viabilidade(),
+                'rendimento' => $l->rendimento_pct,
+                'salmonella' => $l->resultado_salmonella,
             ])->values();
 
         return view('relatorios.desempenho', [

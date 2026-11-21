@@ -20,6 +20,10 @@ class AcompanhamentoRequest extends FormRequest
         $this->merge([
             'mortalidade' => $this->input('mortalidade') ?? 0,
             'eliminados' => $this->input('eliminados') ?? 0,
+            'checklist_agua' => $this->boolean('checklist_agua'),
+            'checklist_racao' => $this->boolean('checklist_racao'),
+            'checklist_ventilacao' => $this->boolean('checklist_ventilacao'),
+            'checklist_cama' => $this->boolean('checklist_cama'),
         ]);
     }
 
@@ -53,6 +57,11 @@ class AcompanhamentoRequest extends FormRequest
             'peso_medio_g' => ['nullable', 'numeric', 'min:1', 'max:6000'],
             'temperatura_c' => ['nullable', 'numeric', 'between:-10,60'],
             'observacao' => ['nullable', 'string', 'max:1000'],
+            'checklist_agua' => ['boolean'],
+            'checklist_racao' => ['boolean'],
+            'checklist_ventilacao' => ['boolean'],
+            'checklist_cama' => ['boolean'],
+            'tipo_racao' => ['nullable', Rule::in(array_keys(Acompanhamento::TIPOS_RACAO))],
         ];
     }
 

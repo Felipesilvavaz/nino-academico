@@ -5,7 +5,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
     <div>
         <h1 class="h4 titulo-secao mb-1">Lote {{ $lote->codigo }} <span class="badge text-bg-{{ $lote->status->cor() }} fs-6">{{ $lote->status->label() }}</span></h1>
-        <div class="text-muted">{{ $lote->aviario->nomeCompleto() }} · Produtor: {{ $lote->aviario->granja->produtor->nome }} · Técnico: {{ $lote->tecnico->name }}</div>
+        <div class="text-muted">{{ $lote->aviario->nomeCompleto() }} · Produtor: {{ $lote->aviario->granja->produtor->nome }} · Técnico: {{ $lote->tecnico->name }}@if ($lote->frigorifico_destino) · Frigorífico de destino: {{ $lote->frigorifico_destino }}@endif</div>
         <div class="mt-2 d-flex flex-wrap gap-2">
             @if ($lote->alertaMortalidade())<span class="badge text-bg-danger"><i class="bi bi-exclamation-triangle"></i> Mortalidade acima do esperado (RN11)</span>@endif
             @if ($lote->alertaPeso())<span class="badge text-bg-warning text-dark"><i class="bi bi-arrow-down-short"></i> Peso abaixo da curva de referência (RN10)</span>@endif
@@ -29,6 +29,12 @@
     <form method="POST" action="{{ route('lotes.encerrar', $lote) }}" class="card p-3 d-flex flex-row flex-wrap gap-2 align-items-end">
         @csrf @method('PATCH')
         <div><label class="form-label small mb-1">Data de encerramento (abate)</label><input type="date" name="data_encerramento" class="form-control form-control-sm" value="{{ now()->format('Y-m-d') }}" required></div>
+        <div><label class="form-label small mb-1">Rendimento (%)</label><input type="number" step="0.01" min="0" max="100" name="rendimento_pct" class="form-control form-control-sm" style="max-width:120px" placeholder="opcional"></div>
+        <div><label class="form-label small mb-1">Salmonella</label>
+            <select name="resultado_salmonella" class="form-select form-select-sm">
+                @foreach (\App\Models\Lote::RESULTADOS_SALMONELLA as $v => $r)<option value="{{ $v }}">{{ $r }}</option>@endforeach
+            </select>
+        </div>
         <button class="btn btn-success btn-sm">Confirmar encerramento</button>
     </form>
 </div>
@@ -47,6 +53,10 @@
         ['Conversão alimentar', $fmt($lote->conversaoAlimentar(), 3)],
         ['IEP', $fmt($lote->iep())],
         ['Projeção de peso no abate', $lote->pesoProjetadoAbateG() ? $fmt($lote->pesoProjetadoAbateG()).' g' : '—'],
+        ...($lote->status->value === 'encerrado' ? [
+            ['Rendimento ao abate', $lote->rendimento_pct ? $fmt($lote->rendimento_pct, 2).'%' : '—'],
+            ['Salmonella', \App\Models\Lote::RESULTADOS_SALMONELLA[$lote->resultado_salmonella] ?? '—'],
+        ] : []),
     ] as [$rotulo, $valor])
         <div class="col-6 col-md-4 col-xl"><div class="card kpi p-3 h-100"><div class="rotulo">{{ $rotulo }}</div><div class="valor fs-4">{{ $valor }}</div></div></div>
     @endforeach
@@ -65,11 +75,55 @@
 @endif
 @endcan
 
+<h2 class="h6 titulo-secao">Chamados sanitários</h2>
+<div class="card p-3 mb-4">
+    @can('operar')
+    @if ($lote->estaAberto())
+    <form method="POST" action="{{ route('ocorrencias.store', $lote) }}" class="row g-2 align-items-end mb-3 no-print">
+        @csrf
+        <div class="col-md-3"><label class="form-label small">Tipo *</label>
+            <select class="form-select form-select-sm" name="tipo" required>
+                @foreach (\App\Models\OcorrenciaSanitaria::TIPOS as $v => $r)<option value="{{ $v }}">{{ $r }}</option>@endforeach
+            </select>
+        </div>
+        <div class="col-md-7"><label class="form-label small">Descrição *</label><input class="form-control form-control-sm" name="descricao" required></div>
+        <div class="col-md-2"><button class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-cone-striped"></i> Abrir chamado</button></div>
+    </form>
+    @endif
+    @endcan
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>Abertura</th><th>Tipo</th><th>Descrição</th><th>Status</th><th>Resolução</th><th></th></tr></thead>
+            <tbody>
+            @forelse ($lote->ocorrenciasSanitarias as $o)
+                <tr>
+                    <td>{{ $o->data_abertura->format('d/m/Y') }}</td>
+                    <td>{{ $o->tipoLabel() }}</td>
+                    <td>{{ $o->descricao }}</td>
+                    <td><span class="badge text-bg-{{ $o->estaAberta() ? 'danger' : 'success' }}">{{ $o->estaAberta() ? 'Aberta' : 'Resolvida' }}</span></td>
+                    <td>{{ $o->data_resolucao?->format('d/m/Y') ?? '—' }}</td>
+                    <td class="no-print">
+                        @can('operar')
+                        @if ($o->estaAberta())
+                        <form method="POST" action="{{ route('ocorrencias.resolver', $o) }}" onsubmit="return confirm('Marcar este chamado como resolvido?')">@csrf @method('PATCH')
+                            <button class="btn btn-sm btn-outline-success py-0"><i class="bi bi-check2"></i> Resolver</button></form>
+                        @endif
+                        @endcan
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="6" class="text-center text-muted py-3">Nenhum chamado sanitário registrado.</td></tr>
+            @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <h2 class="h6 titulo-secao">Histórico de acompanhamento</h2>
 <div class="card">
     <div class="table-responsive">
         <table class="table table-sm table-hover align-middle mb-0">
-            <thead><tr><th>Data</th><th class="text-end">Idade</th><th class="text-end">Mortalidade</th><th class="text-end">Eliminados</th><th class="text-end">Ração (kg)</th><th class="text-end">Peso médio (g)</th><th class="text-end">Temp. (°C)</th><th>Observação</th><th>Registrado por</th><th></th></tr></thead>
+            <thead><tr><th>Data</th><th class="text-end">Idade</th><th class="text-end">Mortalidade</th><th class="text-end">Eliminados</th><th class="text-end">Ração (kg)</th><th>Tipo</th><th class="text-end">Peso médio (g)</th><th class="text-end">Temp. (°C)</th><th>Checklist</th><th>Observação</th><th>Registrado por</th><th></th></tr></thead>
             <tbody>
             @forelse ($lote->acompanhamentos->sortByDesc('data') as $a)
                 <tr>
@@ -78,8 +132,10 @@
                     <td class="text-end">{{ $a->mortalidade }}</td>
                     <td class="text-end">{{ $a->eliminados }}</td>
                     <td class="text-end">{{ $fmt($a->consumo_racao_kg, 2) }}</td>
+                    <td>{{ $a->tipo_racao ? \App\Models\Acompanhamento::TIPOS_RACAO[$a->tipo_racao] : '—' }}</td>
                     <td class="text-end">{{ $fmt($a->peso_medio_g) }}</td>
                     <td class="text-end">{{ $fmt($a->temperatura_c, 1) }}</td>
+                    <td><span class="badge text-bg-{{ $a->checklistConcluido() === 4 ? 'success' : ($a->checklistConcluido() === 0 ? 'secondary' : 'warning') }}">{{ $a->checklistConcluido() }}/4</span></td>
                     <td>{{ $a->observacao }}</td>
                     <td>{{ $a->usuario->name }}</td>
                     <td class="text-end text-nowrap no-print">
@@ -91,7 +147,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="10" class="text-center text-muted py-4">Nenhum acompanhamento registrado.</td></tr>
+                <tr><td colspan="12" class="text-center text-muted py-4">Nenhum acompanhamento registrado.</td></tr>
             @endforelse
             </tbody>
         </table>

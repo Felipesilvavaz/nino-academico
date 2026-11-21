@@ -6,6 +6,8 @@ use App\Http\Controllers\AviarioController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GranjaController;
 use App\Http\Controllers\LoteController;
+use App\Http\Controllers\OcorrenciaSanitariaController;
+use App\Http\Controllers\OperacaoController;
 use App\Http\Controllers\ProdutorController;
 use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\UserController;
@@ -43,6 +45,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('lotes.acompanhamentos', AcompanhamentoController::class)
             ->shallow()
             ->only(['store', 'edit', 'update', 'destroy']);
+
+        // RF19 – Chamados sanitários
+        Route::post('lotes/{lote}/ocorrencias', [OcorrenciaSanitariaController::class, 'store'])->name('ocorrencias.store');
+        Route::patch('ocorrencias/{ocorrencia}/resolver', [OcorrenciaSanitariaController::class, 'resolver'])->name('ocorrencias.resolver');
     });
 
     // Consulta de lotes liberada também para o gestor
@@ -50,4 +56,13 @@ Route::middleware('auth')->group(function () {
 
     // UC06 – Consultar desempenho do lote
     Route::get('/relatorios/desempenho', [RelatorioController::class, 'desempenho'])->name('relatorios.desempenho');
+
+    // UC07 – Acompanhar a operação do módulo (consulta liberada para todos os perfis)
+    Route::prefix('operacao')->name('operacao.')->group(function () {
+        Route::get('rota-tecnico', [OperacaoController::class, 'rotaTecnico'])->name('rota');
+        Route::get('programacao-abate', [OperacaoController::class, 'programacaoAbate'])->name('abate');
+        Route::get('lancamentos', [OperacaoController::class, 'lancamentos'])->name('lancamentos');
+        Route::get('aviarios', [OperacaoController::class, 'aviarios'])->name('aviarios');
+        Route::get('mapa-sanitario', [OperacaoController::class, 'mapaSanitario'])->name('sanitario');
+    });
 });

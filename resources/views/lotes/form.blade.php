@@ -21,6 +21,7 @@
                 <datalist id="linhagens"><option>Cobb 500</option><option>Ross 308</option><option>Hubbard Flex</option></datalist></div>
             <div class="col-md-4"><label class="form-label">Data de alojamento *</label><input type="date" class="form-control" name="data_alojamento" value="{{ old('data_alojamento', $lote->data_alojamento?->format('Y-m-d')) }}" required></div>
             <div class="col-md-4"><label class="form-label">Abate previsto</label><input type="date" class="form-control" name="data_abate_prevista" value="{{ old('data_abate_prevista', $lote->data_abate_prevista?->format('Y-m-d')) }}"></div>
+            <div class="col-md-4"><label class="form-label">Frigorífico de destino</label><input class="form-control" name="frigorifico_destino" value="{{ old('frigorifico_destino', $lote->frigorifico_destino) }}" placeholder="opcional"></div>
             <div class="col-md-4"><label class="form-label">Quantidade alojada *</label><input type="number" class="form-control" name="qtd_alojada" value="{{ old('qtd_alojada', $lote->qtd_alojada) }}" required></div>
             <div class="col-md-4"><label class="form-label">Peso inicial (g) *</label><input type="number" step="0.01" class="form-control" name="peso_inicial_g" value="{{ old('peso_inicial_g', $lote->peso_inicial_g) }}" required></div>
         </div>

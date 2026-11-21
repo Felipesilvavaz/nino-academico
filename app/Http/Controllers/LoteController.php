@@ -10,6 +10,7 @@ use App\Models\Lote;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /** UC04 – Manter lotes. */
@@ -52,7 +53,7 @@ class LoteController extends Controller
 
     public function show(Lote $lote): View
     {
-        $lote->load(['aviario.granja.produtor', 'tecnico', 'acompanhamentos.usuario']);
+        $lote->load(['aviario.granja.produtor', 'tecnico', 'acompanhamentos.usuario', 'ocorrenciasSanitarias.usuario']);
 
         return view('lotes.show', compact('lote'));
     }
@@ -84,9 +85,20 @@ class LoteController extends Controller
 
         $dados = $request->validate([
             'data_encerramento' => ['required', 'date', 'after_or_equal:'.$lote->data_alojamento->format('Y-m-d'), 'before_or_equal:today'],
-        ], [], ['data_encerramento' => 'data de encerramento']);
+            // RF24: informe de rendimento e de monitoramento de Salmonella, preenchidos no abate.
+            'rendimento_pct' => ['nullable', 'numeric', 'between:0,100'],
+            'resultado_salmonella' => ['nullable', Rule::in(array_keys(Lote::RESULTADOS_SALMONELLA))],
+        ], [], [
+            'data_encerramento' => 'data de encerramento',
+            'rendimento_pct' => 'rendimento (%)',
+            'resultado_salmonella' => 'resultado do monitoramento de Salmonella',
+        ]);
 
-        $lote->encerrar(Carbon::parse($dados['data_encerramento']));
+        $lote->encerrar(
+            Carbon::parse($dados['data_encerramento']),
+            rendimentoPct: $dados['rendimento_pct'] ?? null,
+            resultadoSalmonella: $dados['resultado_salmonella'] ?? null,
+        );
 
         return redirect()->route('lotes.show', $lote)->with('success', 'Lote encerrado. O aviário está liberado.');
     }

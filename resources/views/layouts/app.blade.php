@@ -37,6 +37,16 @@
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link @if(request()->routeIs('dashboard')) active @endif" href="{{ route('dashboard') }}"><i class="bi bi-speedometer2"></i> Painel</a></li>
                 <li class="nav-item"><a class="nav-link @if(request()->routeIs('lotes.*')) active @endif" href="{{ route('lotes.index') }}"><i class="bi bi-egg"></i> Lotes</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle @if(request()->routeIs('operacao.*')) active @endif" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-clipboard-check"></i> Operação</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ route('operacao.rota') }}"><i class="bi bi-geo-alt"></i> Rota do técnico</a></li>
+                        <li><a class="dropdown-item" href="{{ route('operacao.abate') }}"><i class="bi bi-calendar-event"></i> Programação de abate</a></li>
+                        <li><a class="dropdown-item" href="{{ route('operacao.lancamentos') }}"><i class="bi bi-list-check"></i> Lançamentos</a></li>
+                        <li><a class="dropdown-item" href="{{ route('operacao.aviarios') }}"><i class="bi bi-grid-3x3-gap"></i> Visão geral dos aviários</a></li>
+                        <li><a class="dropdown-item" href="{{ route('operacao.sanitario') }}"><i class="bi bi-cone-striped"></i> Mapa sanitário</a></li>
+                    </ul>
+                </li>
                 @can('cadastros')
                 <li class="nav-item"><a class="nav-link @if(request()->routeIs('granjas.*', 'aviarios.*')) active @endif" href="{{ route('granjas.index') }}"><i class="bi bi-house"></i> Granjas</a></li>
                 <li class="nav-item"><a class="nav-link @if(request()->routeIs('produtores.*')) active @endif" href="{{ route('produtores.index') }}"><i class="bi bi-person-vcard"></i> Produtores</a></li>

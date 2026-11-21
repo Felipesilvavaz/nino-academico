@@ -37,6 +37,8 @@ class LoteRequest extends FormRequest
             }],
             'peso_inicial_g' => ['required', 'numeric', 'min:1', 'max:200'],
             'data_abate_prevista' => ['nullable', 'date', 'after:data_alojamento'],
+            // RF22: destino do lote na programação de abate (opcional, pode ser definido depois).
+            'frigorifico_destino' => ['nullable', 'string', 'max:100'],
         ];
     }
 
@@ -49,6 +51,7 @@ class LoteRequest extends FormRequest
             'qtd_alojada' => 'quantidade alojada',
             'peso_inicial_g' => 'peso inicial (g)',
             'data_abate_prevista' => 'data prevista de abate',
+            'frigorifico_destino' => 'frigorífico de destino',
         ];
     }
 }
