@@ -1,0 +1,30 @@
+sequenceDiagram
+    autonumber
+    actor T as Técnico / Gestor
+    participant V as View (operacao)
+    participant OC as OperacaoController
+    participant L as Lote (Model)
+    participant OS as OcorrenciaSanitaria (Model)
+    participant DB as MySQL
+    T->>V: Acessa "Rota do técnico"
+    V->>OC: GET /operacao/rota-tecnico
+    OC->>L: with(aviario.granja, acompanhamentos)->where(aberto)
+    L->>DB: SELECT lotes WHERE status = 'aberto'
+    DB-->>L: lotes abertos
+    loop para cada lote
+        OC->>L: diasSemAcompanhamento()
+        OC->>L: precisaVisita()
+    end
+    OC-->>V: view('operacao.rota-tecnico', lotes ordenados)
+    V-->>T: Lista de lotes por urgência de visita
+    T->>V: Abre chamado sanitário (tipo, descrição)
+    V->>OC: POST /lotes/{lote}/ocorrencias
+    alt lote encerrado
+        OC-->>V: erro "Só é possível abrir chamado para lote aberto"
+    else lote aberto
+        OC->>OS: create(lote_id, tipo, descricao, status = aberta)
+        OS->>DB: INSERT INTO ocorrencias_sanitarias
+        DB-->>OS: id do chamado
+        OC-->>V: redirect com sucesso
+        V-->>T: Chamado sanitário aberto
+    end

@@ -1,9 +1,22 @@
 digraph UC {
   rankdir=LR; graph [fontname="Arial", nodesep=0.35, ranksep=1.1, pad=0.3, dpi=200];
   node [fontname="Arial", fontsize=12]; edge [fontname="Arial", fontsize=10, arrowhead=none];
-  admin [shape=none, label=<<TABLE BORDER="0" CELLSPACING="0"><TR><TD><IMG SRC="actor_s.png"/></TD></TR><TR><TD>Administrador</TD></TR></TABLE>>];
-  tec [shape=none, label=<<TABLE BORDER="0" CELLSPACING="0"><TR><TD><IMG SRC="actor_s.png"/></TD></TR><TR><TD>Técnico de Campo</TD></TR></TABLE>>];
-  gestor [shape=none, label=<<TABLE BORDER="0" CELLSPACING="0"><TR><TD><IMG SRC="actor_s.png"/></TD></TR><TR><TD>Gestor</TD></TR></TABLE>>];
+  node [shape=none, margin=0];
+  admin [label=<
+    <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="4">
+    <TR><TD FIXEDSIZE="TRUE" WIDTH="28" HEIGHT="28"><TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" STYLE="ROUNDED"><TR><TD HEIGHT="26" WIDTH="26"></TD></TR></TABLE></TD></TR>
+    <TR><TD><B>Administrador</B></TD></TR>
+    </TABLE>>];
+  tec [label=<
+    <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="4">
+    <TR><TD FIXEDSIZE="TRUE" WIDTH="28" HEIGHT="28"><TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" STYLE="ROUNDED"><TR><TD HEIGHT="26" WIDTH="26"></TD></TR></TABLE></TD></TR>
+    <TR><TD><B>Técnico de Campo</B></TD></TR>
+    </TABLE>>];
+  gestor [label=<
+    <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="4">
+    <TR><TD FIXEDSIZE="TRUE" WIDTH="28" HEIGHT="28"><TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" STYLE="ROUNDED"><TR><TD HEIGHT="26" WIDTH="26"></TD></TR></TABLE></TD></TR>
+    <TR><TD><B>Gestor</B></TD></TR>
+    </TABLE>>];
   subgraph cluster_sys {
     label="Sistema NINO – Módulo Frango de Corte"; fontsize=14; style=rounded; color="#2D358F"; penwidth=1.5;
     node [shape=ellipse, style=filled, fillcolor="#EEF0FB", color="#2D358F"];
@@ -12,12 +25,13 @@ digraph UC {
     uc4 [label="UC04\nManter Lotes"];
     uc5 [label="UC05\nRegistrar Acompanhamento\nDiário"];
     uc6 [label="UC06\nConsultar Desempenho\ndo Lote"];
+    uc7 [label="UC07\nAcompanhar a Operação\ndo Módulo"];
     uc1 [label="UC01\nAutenticar Usuário", fillcolor="#FDECEC", color="#ED1C24"];
   }
   admin -> uc2; admin -> uc3;
-  tec -> uc3; tec -> uc4; tec -> uc5; tec -> uc6;
-  gestor -> uc6;
+  tec -> uc3; tec -> uc4; tec -> uc5; tec -> uc6; tec -> uc7;
+  gestor -> uc6; gestor -> uc7;
   edge [style=dashed, arrowhead=vee, fontsize=9, label="«include»"];
-  uc2 -> uc1; uc3 -> uc1; uc4 -> uc1; uc5 -> uc1; uc6 -> uc1;
+  uc2 -> uc1; uc3 -> uc1; uc4 -> uc1; uc5 -> uc1; uc6 -> uc1; uc7 -> uc1;
   { rank=same; admin; tec; gestor; }
 }
