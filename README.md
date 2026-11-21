@@ -4,7 +4,7 @@ Sistema web para **gestão de lotes de frango de corte** em granjas integradas, 
 
 Projeto das disciplinas **Projeto de Desenvolvimento de Software I e II** – UniFil – Centro Universitário Filadélfia.
 
-> Esta é uma versão acadêmica e simplificada, inspirada no sistema NINO (Núcleo de Inteligência, Nutrição e Operação). Ela foi escrita do zero para a disciplina e **não contém código nem dados reais da empresa**. Os dados de exemplo (seeders) são fictícios.
+> Esta é uma versão acadêmica e simplificada, inspirada no cenário da integração avícola. Ela foi escrita do zero para a disciplina e **não contém nenhum código ou dado real**. Os dados de exemplo (seeders) são fictícios.
 
 ## Integrantes
 
