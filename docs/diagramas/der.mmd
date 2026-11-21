@@ -1,0 +1,82 @@
+erDiagram
+    direction LR
+    USERS ||--o{ LOTES : "é responsável por"
+    USERS ||--o{ ACOMPANHAMENTOS : "registra"
+    PRODUTORES ||--|{ GRANJAS : "possui"
+    GRANJAS ||--|{ AVIARIOS : "contém"
+    AVIARIOS ||--o{ LOTES : "aloja"
+    LOTES ||--o{ ACOMPANHAMENTOS : "possui"
+    USERS {
+        bigint id PK
+        varchar name
+        varchar email UK
+        varchar password
+        enum perfil "admin, tecnico, gestor"
+        boolean ativo
+        timestamp created_at
+        timestamp updated_at
+    }
+    PRODUTORES {
+        bigint id PK
+        varchar nome
+        varchar cpf_cnpj UK
+        varchar telefone
+        varchar cidade
+        char uf
+        timestamp created_at
+        timestamp updated_at
+    }
+    GRANJAS {
+        bigint id PK
+        bigint produtor_id FK
+        varchar nome
+        varchar endereco
+        varchar cidade
+        char uf
+        decimal latitude
+        decimal longitude
+        boolean ativo
+        timestamp created_at
+        timestamp updated_at
+    }
+    AVIARIOS {
+        bigint id PK
+        bigint granja_id FK
+        varchar identificacao
+        decimal area_m2
+        int capacidade_aves
+        enum tipo "convencional, dark_house"
+        timestamp created_at
+        timestamp updated_at
+    }
+    LOTES {
+        bigint id PK
+        bigint aviario_id FK
+        bigint tecnico_id FK
+        varchar codigo UK
+        varchar linhagem
+        date data_alojamento
+        int qtd_alojada
+        decimal peso_inicial_g
+        date data_abate_prevista
+        date data_encerramento
+        enum status "aberto, encerrado, cancelado"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    ACOMPANHAMENTOS {
+        bigint id PK
+        bigint lote_id FK
+        bigint user_id FK
+        date data
+        int idade_dias
+        int mortalidade
+        int eliminados
+        decimal consumo_racao_kg
+        decimal peso_medio_g
+        decimal temperatura_c
+        text observacao
+        timestamp created_at
+        timestamp updated_at
+    }

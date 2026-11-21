@@ -1,0 +1,35 @@
+sequenceDiagram
+    autonumber
+    actor AD as Administrador
+    participant V as View (users)
+    participant MW as Middleware (auth, can:admin)
+    participant C as UserController
+    participant R as UserRequest
+    participant M as User (Model)
+    participant DB as MySQL
+    AD->>V: Acessa "Usuários"
+    V->>MW: GET /users
+    MW->>C: index()
+    C->>M: orderBy(name)->paginate(15)
+    M->>DB: SELECT * FROM users
+    DB-->>M: registros
+    C-->>V: view('users.index', usuarios)
+    AD->>V: Preenche formulário (novo ou edição)
+    V->>MW: POST /users ou PUT /users/{id}
+    MW->>C: store() / update()
+    C->>R: validate() (e-mail único, perfil válido)
+    alt dados inválidos
+        R-->>V: erros de validação
+    else dados válidos
+        C->>M: create() / update() com senha em hash
+        M->>DB: INSERT / UPDATE users
+        DB-->>M: OK
+        C-->>V: redirect com mensagem de sucesso
+    end
+    AD->>V: Clica em "Inativar"
+    V->>MW: DELETE /users/{id}
+    MW->>C: destroy(id)
+    C->>M: update(ativo = false)
+    M->>DB: UPDATE users SET ativo = 0
+    C-->>V: redirect com mensagem
+    V-->>AD: Lista atualizada

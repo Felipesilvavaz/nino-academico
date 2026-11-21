@@ -1,0 +1,88 @@
+classDiagram
+    direction LR
+    class User {
+        +int id
+        +string name
+        +string email
+        -string password
+        +string perfil
+        +bool ativo
+        +isAdmin() bool
+        +isTecnico() bool
+        +lotes() HasMany
+    }
+    class Produtor {
+        +int id
+        +string nome
+        +string cpfCnpj
+        +string telefone
+        +string cidade
+        +string uf
+        +granjas() HasMany
+    }
+    class Granja {
+        +int id
+        +string nome
+        +string endereco
+        +string cidade
+        +string uf
+        +float latitude
+        +float longitude
+        +bool ativo
+        +produtor() BelongsTo
+        +aviarios() HasMany
+    }
+    class Aviario {
+        +int id
+        +string identificacao
+        +float areaM2
+        +int capacidadeAves
+        +string tipo
+        +granja() BelongsTo
+        +lotes() HasMany
+        +possuiLoteAberto() bool
+        +scopeLivres(query) Builder
+    }
+    class Lote {
+        +int id
+        +string codigo
+        +string linhagem
+        +Date dataAlojamento
+        +int qtdAlojada
+        +float pesoInicialG
+        +Date dataAbatePrevista
+        +Date dataEncerramento
+        +StatusLote status
+        +idadeAtual() int
+        +avesVivas() int
+        +gmd() float
+        +viabilidade() float
+        +conversaoAlimentar() float
+        +iep() float
+        +encerrar(Date data) void
+    }
+    class Acompanhamento {
+        +int id
+        +Date data
+        +int idadeDias
+        +int mortalidade
+        +int eliminados
+        +float consumoRacaoKg
+        +float pesoMedioG
+        +float temperaturaC
+        +string observacao
+        +lote() BelongsTo
+    }
+    class StatusLote {
+        <<enumeration>>
+        ABERTO
+        ENCERRADO
+        CANCELADO
+    }
+    Produtor "1" --> "1..*" Granja : possui
+    Granja "1" *-- "1..*" Aviario : contém
+    Aviario "1" --> "0..*" Lote : aloja
+    Lote "1" *-- "0..*" Acompanhamento : possui
+    User "1" --> "0..*" Lote : responsável
+    User "1" --> "0..*" Acompanhamento : registra
+    Lote ..> StatusLote

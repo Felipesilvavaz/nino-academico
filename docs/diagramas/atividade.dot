@@ -1,0 +1,27 @@
+digraph AT {
+  graph [fontname="Arial", dpi=200, nodesep=0.45, ranksep=0.32, pad=0.25, newrank=true];
+  node [fontname="Arial", fontsize=11, shape=box, style="rounded,filled", fillcolor="#EEF0FB", color="#2D358F", margin="0.15,0.06"];
+  edge [fontname="Arial", fontsize=9, arrowsize=0.7];
+  ini [shape=circle, label="", width=0.22, style=filled, fillcolor=black, color=black];
+  fim [shape=doublecircle, label="", width=0.18, style=filled, fillcolor=black, color=black];
+  A [label="Fazer login no sistema"];
+  B [shape=diamond, style=filled, fillcolor="#FDECEC", color="#ED1C24", label="Login\nválido?", fontsize=9, margin=0];
+  C [label="Selecionar granja e aviário"];
+  D [shape=diamond, style=filled, fillcolor="#FDECEC", color="#ED1C24", label="Aviário\nlivre?", fontsize=9, margin=0];
+  E [label="Exibir aviso:\naviário ocupado"];
+  F [label="Informar dados do lote\n(linhagem, data, qtd., peso)"];
+  G [shape=diamond, style=filled, fillcolor="#FDECEC", color="#ED1C24", label="Dados\nválidos?", fontsize=9, margin=0];
+  H [label="Sistema grava o lote\ncom status ABERTO"];
+  J [label="Registrar acompanhamento diário\n(mortalidade, ração, peso, temp.)"];
+  K [label="Sistema recalcula indicadores\n(viabilidade, CA, GMD, IEP)"];
+  L [shape=diamond, style=filled, fillcolor="#FDECEC", color="#ED1C24", label="Lote\nabatido?", fontsize=9, margin=0];
+  M [label="Técnico encerra o lote"];
+  N [label="Sistema muda status para\nENCERRADO e libera o aviário"];
+  O [label="Gestor consulta o\nrelatório de desempenho"];
+  ini -> A -> B; B -> A [label=" Não"]; B -> C [label=" Sim"];
+  C -> D; D -> E [label=" Não"]; E -> C; D -> F [label=" Sim"];
+  F -> G; G -> F [label=" Não"]; G -> H [label=" Sim"];
+  H -> J [constraint=false];
+  J -> K -> L; L -> J [label=" Não"]; L -> M [label=" Sim"]; M -> N -> O -> fim;
+  { rank=same; ini; J; }
+}

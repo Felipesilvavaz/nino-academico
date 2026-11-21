@@ -1,0 +1,39 @@
+sequenceDiagram
+    autonumber
+    actor T as Técnico de Campo
+    participant V as View (lotes)
+    participant C as LoteController
+    participant R as LoteRequest
+    participant AV as Aviario (Model)
+    participant L as Lote (Model)
+    participant DB as MySQL
+    T->>V: Clica em "Alojar novo lote"
+    V->>C: GET /lotes/create
+    C->>AV: aviários sem lote aberto
+    AV->>DB: SELECT aviarios WHERE NOT EXISTS lote aberto
+    C-->>V: formulário com aviários livres
+    T->>V: Informa aviário, linhagem, data, quantidade
+    V->>C: POST /lotes
+    C->>R: validate()
+    R->>AV: possuiLoteAberto()?
+    AV->>DB: SELECT lotes WHERE status = 'aberto'
+    alt inválido ou aviário ocupado
+        R-->>V: erros de validação
+        V-->>T: Exibe mensagens
+    else válido
+        C->>L: create(status = ABERTO, tecnico_id = auth)
+        L->>DB: INSERT INTO lotes
+        DB-->>L: id do lote
+        C-->>V: redirect(/lotes/{id})
+        V-->>T: Ficha do lote
+    end
+    T->>V: Editar ou encerrar lote
+    V->>C: PUT /lotes/{id} ou PATCH /lotes/{id}/encerrar
+    C->>L: update() / encerrar(data)
+    L->>DB: UPDATE lotes SET status = 'encerrado'
+    C-->>V: redirect com sucesso
+    T->>V: Excluir lote
+    V->>C: DELETE /lotes/{id}
+    C->>L: delete() (soft delete)
+    L->>DB: UPDATE lotes SET deleted_at = NOW()
+    C-->>V: redirect com sucesso

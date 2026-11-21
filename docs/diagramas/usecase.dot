@@ -1,0 +1,23 @@
+digraph UC {
+  rankdir=LR; graph [fontname="Arial", nodesep=0.35, ranksep=1.1, pad=0.3, dpi=200];
+  node [fontname="Arial", fontsize=12]; edge [fontname="Arial", fontsize=10, arrowhead=none];
+  admin [shape=none, label=<<TABLE BORDER="0" CELLSPACING="0"><TR><TD><IMG SRC="actor_s.png"/></TD></TR><TR><TD>Administrador</TD></TR></TABLE>>];
+  tec [shape=none, label=<<TABLE BORDER="0" CELLSPACING="0"><TR><TD><IMG SRC="actor_s.png"/></TD></TR><TR><TD>Técnico de Campo</TD></TR></TABLE>>];
+  gestor [shape=none, label=<<TABLE BORDER="0" CELLSPACING="0"><TR><TD><IMG SRC="actor_s.png"/></TD></TR><TR><TD>Gestor</TD></TR></TABLE>>];
+  subgraph cluster_sys {
+    label="Sistema NINO – Módulo Frango de Corte"; fontsize=14; style=rounded; color="#2D358F"; penwidth=1.5;
+    node [shape=ellipse, style=filled, fillcolor="#EEF0FB", color="#2D358F"];
+    uc2 [label="UC02\nManter Usuários"];
+    uc3 [label="UC03\nManter Granjas\ne Aviários"];
+    uc4 [label="UC04\nManter Lotes"];
+    uc5 [label="UC05\nRegistrar Acompanhamento\nDiário"];
+    uc6 [label="UC06\nConsultar Desempenho\ndo Lote"];
+    uc1 [label="UC01\nAutenticar Usuário", fillcolor="#FDECEC", color="#ED1C24"];
+  }
+  admin -> uc2; admin -> uc3;
+  tec -> uc3; tec -> uc4; tec -> uc5; tec -> uc6;
+  gestor -> uc6;
+  edge [style=dashed, arrowhead=vee, fontsize=9, label="«include»"];
+  uc2 -> uc1; uc3 -> uc1; uc4 -> uc1; uc5 -> uc1; uc6 -> uc1;
+  { rank=same; admin; tec; gestor; }
+}

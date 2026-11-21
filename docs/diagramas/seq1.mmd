@@ -1,0 +1,33 @@
+sequenceDiagram
+    autonumber
+    actor U as Usuário
+    participant V as View (login.blade.php)
+    participant C as AuthController
+    participant R as LoginRequest
+    participant A as Auth (Guard)
+    participant M as User (Model)
+    participant DB as MySQL
+    U->>V: Informa e-mail e senha
+    V->>C: POST /login
+    C->>R: validate()
+    alt dados inválidos
+        R-->>V: erros de validação
+        V-->>U: Exibe mensagens de erro
+    else dados válidos
+        C->>A: attempt(email, senha)
+        A->>M: where(email)->first()
+        M->>DB: SELECT * FROM users WHERE email = ?
+        DB-->>M: registro do usuário
+        M-->>A: User
+        A->>A: Hash::check(senha) e ativo = true
+        alt credenciais incorretas ou usuário inativo
+            A-->>C: false
+            C-->>V: back()->withErrors()
+            V-->>U: "Credenciais inválidas"
+        else credenciais corretas
+            A-->>C: true
+            C->>C: session()->regenerate()
+            C-->>V: redirect(/dashboard)
+            V-->>U: Exibe painel do módulo
+        end
+    end

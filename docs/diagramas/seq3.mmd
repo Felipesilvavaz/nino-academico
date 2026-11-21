@@ -1,0 +1,42 @@
+sequenceDiagram
+    autonumber
+    actor U as Administrador / Técnico
+    participant V as View (granjas)
+    participant C as GranjaController
+    participant R as GranjaRequest
+    participant G as Granja (Model)
+    participant AV as Aviario (Model)
+    participant DB as MySQL
+    U->>V: Acessa "Granjas"
+    V->>C: GET /granjas
+    C->>G: with(produtor)->withCount(aviarios)->paginate()
+    G->>DB: SELECT granjas JOIN produtores
+    DB-->>G: registros
+    C-->>V: view('granjas.index')
+    U->>V: Cadastra granja e seus aviários
+    V->>C: POST /granjas
+    C->>R: validate()
+    alt dados inválidos
+        R-->>V: erros de validação
+    else dados válidos
+        C->>DB: DB::beginTransaction()
+        C->>G: create(dados da granja)
+        G->>DB: INSERT INTO granjas
+        loop para cada aviário informado
+            C->>AV: granja->aviarios()->create()
+            AV->>DB: INSERT INTO aviarios
+        end
+        C->>DB: DB::commit()
+        C-->>V: redirect com sucesso
+    end
+    U->>V: Excluir granja
+    V->>C: DELETE /granjas/{id}
+    C->>G: lotes()->exists()
+    G->>DB: SELECT lotes JOIN aviarios WHERE granja_id = ?
+    alt possui lotes
+        C-->>V: erro "Granja possui lotes"
+    else sem lotes
+        C->>G: delete()
+        G->>DB: DELETE FROM granjas
+        C-->>V: redirect com sucesso
+    end

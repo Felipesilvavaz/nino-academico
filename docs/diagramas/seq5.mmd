@@ -1,0 +1,37 @@
+sequenceDiagram
+    autonumber
+    actor T as Técnico de Campo
+    participant V as View (lotes.show)
+    participant C as AcompanhamentoController
+    participant R as AcompanhamentoRequest
+    participant L as Lote (Model)
+    participant A as Acompanhamento (Model)
+    participant DB as MySQL
+    T->>V: Abre a ficha do lote
+    V->>C: GET /lotes/{id}/acompanhamentos
+    C->>A: lote->acompanhamentos()->orderBy(data)
+    A->>DB: SELECT * FROM acompanhamentos WHERE lote_id = ?
+    C-->>V: histórico diário
+    T->>V: Informa mortalidade, ração, peso, temperatura
+    V->>C: POST /lotes/{id}/acompanhamentos
+    C->>L: status == ABERTO?
+    alt lote encerrado
+        C-->>V: erro "Lote encerrado"
+    else lote aberto
+        C->>R: validate() (data única, valores ≥ 0)
+        alt dados inválidos
+            R-->>V: erros de validação
+        else dados válidos
+            C->>L: idadeAtual(data)
+            C->>A: create(lote_id, user_id, idade_dias, ...)
+            A->>DB: INSERT INTO acompanhamentos
+            DB-->>A: OK
+            C-->>V: redirect com sucesso
+            V-->>T: Histórico e indicadores atualizados
+        end
+    end
+    T->>V: Corrige ou exclui um registro
+    V->>C: PUT / DELETE /acompanhamentos/{id}
+    C->>A: update() / delete()
+    A->>DB: UPDATE / DELETE acompanhamentos
+    C-->>V: redirect com sucesso

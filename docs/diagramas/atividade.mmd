@@ -1,0 +1,21 @@
+flowchart TD
+    I((" ")) --> A(Fazer login no sistema)
+    A --> B{Login válido?}
+    B -- Não --> A
+    B -- Sim --> C(Selecionar granja e aviário)
+    C --> D{Aviário livre?}
+    D -- Não --> E(Exibir aviso: aviário ocupado) --> C
+    D -- Sim --> F(Informar dados do lote)
+    F --> G{Dados válidos?}
+    G -- Não --> F
+    G -- Sim --> H(Gravar lote com status ABERTO)
+    H --> J(Registrar acompanhamento diário)
+    J --> K(Recalcular indicadores do lote)
+    K --> L{Abate?}
+    L -- Não --> J
+    L -- Sim --> M(Encerrar o lote)
+    M --> N(Status ENCERRADO e aviário liberado)
+    N --> O(Gestor consulta desempenho)
+    O --> F2(((" ")))
+    style I fill:#000,stroke:#000
+    style F2 fill:#000,stroke:#000

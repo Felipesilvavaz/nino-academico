@@ -1,0 +1,32 @@
+sequenceDiagram
+    autonumber
+    actor G as Gestor / Técnico
+    participant V as View (relatorios)
+    participant C as RelatorioController
+    participant L as Lote (Model)
+    participant A as Acompanhamento (Model)
+    participant DB as MySQL
+    G->>V: Define filtros (granja, período, status)
+    V->>C: GET /relatorios/desempenho?filtros
+    C->>L: with(aviario.granja, acompanhamentos)->filtrar()
+    L->>DB: SELECT lotes JOIN aviarios JOIN granjas
+    DB-->>L: lotes
+    L->>A: carrega acompanhamentos (eager loading)
+    A->>DB: SELECT * FROM acompanhamentos WHERE lote_id IN (...)
+    DB-->>A: registros diários
+    loop para cada lote
+        C->>L: viabilidade()
+        C->>L: conversaoAlimentar()
+        C->>L: iep()
+    end
+    alt nenhum lote encontrado
+        C-->>V: mensagem "Nenhum resultado"
+    else lotes encontrados
+        C-->>V: view('relatorios.desempenho', indicadores)
+        V-->>G: Tabela de desempenho com médias
+    end
+    opt imprimir ou salvar em PDF
+        G->>V: Clica em "Imprimir / salvar em PDF"
+        V->>V: window.print() (layout de impressão)
+        V-->>G: PDF gerado pelo navegador
+    end
