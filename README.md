@@ -10,8 +10,7 @@ Projeto das disciplinas **Projeto de Desenvolvimento de Software I e II** – Un
 
 | Nome | RA |
 |------|----|
-| [NOME DO ALUNO 1] | [000000] |
-| [NOME DO ALUNO 2 – remova se for individual] | [000000] |
+| Felipe da Silva Vaz | 241466053 |
 
 ## Funcionalidades (CRUD)
 
