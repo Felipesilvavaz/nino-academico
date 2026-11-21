@@ -35,7 +35,7 @@ Projeto das disciplinas **Projeto de Desenvolvimento de Software I e II** – Un
 Pré-requisitos: PHP 8.2 ou superior (com as extensões `pdo_mysql` e `pdo_sqlite`), Composer e MySQL 8.
 
 ```bash
-git clone https://github.com/[usuario]/[repositorio].git nino
+git clone https://github.com/Felipesilvavaz/nino-academico.git nino
 cd nino
 composer install
 cp .env.example .env          # no Windows: copy .env.example .env
